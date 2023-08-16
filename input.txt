@@ -1,0 +1,33 @@
+! INPUT FILE FOR FUNWAVE_TVD
+! NOTE: all input parameter are capital sensitive
+! --------------------TITLE-------------------------------------
+! title only for log file
+TITLE =model1
+
+! -------------------PARALLEL INFO-----------------------------
+!    PX,PY - processor numbers in X and Y
+!    NOTE: make sure consistency with mpirun -np n (px*py)
+PX = 4
+PY = 1
+! --------------------DEPTH-------------------------------------
+! Depth types, DEPTH_TYPE=DATA: from depth file
+!              DEPTH_TYPE=FLAT: idealized flat, need depth_flat
+!              DEPTH_TYPE=SLOPE: idealized slope,
+!                                 need slope,SLP starting point, Xslp
+!                                 and depth_flat
+DEPTH_TYPE =FLAT
+DEPTH_FLAT = 10.000000
+! -------------------PRINT---------------------------------
+! PRINT*,
+! result folder
+RESULT_FOLDER = output/
+! ------------------DIMENSION-----------------------------
+! global grid dimension
+Mglob = 500
+Nglob = 500
+! ----------------- TIME----------------------------------
+! time: total computational time/ plot time / screen interval
+! all in seconds
+TOTAL_TIME = 300.000000
+PLOT_INTV = 1.000000
+SCREEN_INTV = 1.000000
