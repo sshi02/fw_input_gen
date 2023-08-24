@@ -28,8 +28,7 @@ class LabelEntryD: # shorthand LED in variable names
     |   height_led = LabelEntryD(m, "Height (m)") # Make LED for Height value
     |   height_led.set(15)                        # Make default value 15
     |   print(height_led.get())                   # Get current value of LED
-    |   height_led.label.grid(row = 0, column = 0)# Place and position label in window
-    |   height_led.entry.grid(row = 0, column = 1)# Don't forget the entry!
+    |   height_led.grid(row = 0, column = 0)      # Place and position LED in window
     |   m.mainloop()
     '''
     def __init__(self, m, text) -> None:
@@ -49,7 +48,15 @@ class LabelEntryD: # shorthand LED in variable names
         self.value = x
     def get(self):
         return self.value
-    
+    def hide(self):
+        self.label.grid_forget()
+        self.label.pack_forget()
+        self.entry.grid_forget()
+        self.label.pack_forget()
+    def grid(self, row = 0, column = 0):
+        self.label.grid(row = row, column = column)
+        self.entry.grid(row = row, column = column + 1)
+            
 class LabelEntryF:
     '''LabelEntryF(loat) Class. 
     This class manages a label and entry widget, where input to the
@@ -69,8 +76,7 @@ class LabelEntryF:
     |   height_lef = LabelEntryD(m, "Height (m)") # Make LEF for Height value
     |   height_lef.set(15.0)                      # Make default value 15.0
     |   print(height_lef.get())                   # Get current value of LEF
-    |   height_lef.label.grid(row = 0, column = 0)# Place and position label in window
-    |   height_lef.entry.grid(row = 0, column = 1)# Don't forget the entry!
+    |   height_lef.grid(row = 0, column = 0)      # Place and position LEF in window
     |   m.mainloop()
     '''
     def __init__(self, m, text) -> None:
@@ -78,7 +84,7 @@ class LabelEntryF:
         self.label = tk.Label(m, text = text)
         self.str = tk.StringVar(value = f"{self.value : f}")
         def set(var, index, mode):
-            if (self.str.get().strip().replace(".", "", 1).isnumeric()):
+            if (self.str.get().strip().replace(".", "", 1).replace("-", "", 1).isnumeric()):
                 self.value = float(self.str.get())
             elif not self.str.get().strip() == "":
                 self.str.set(f"{self.value : f}")
@@ -91,6 +97,79 @@ class LabelEntryF:
         self.value = x
     def get(self):
         return self.value
+    def hide(self):
+        self.label.grid_forget()
+        self.label.pack_forget()
+        self.entry.grid_forget()
+        self.entry.pack_forget()
+    def grid(self, row = 0, column = 0):
+        self.label.grid(row = row, column = column)
+        self.entry.grid(row = row, column = column + 1)
+
+class LabelEntryS:
+    '''LabelEntryS(tring) Class. 
+    This class manages a label and entry widget. Input is not validated
+
+    Args:
+        m: Frame/Window the widgets will belong to
+        text: Label text
+    Methods:
+        set(): sets value of entry
+        get(): returns last value inputted to entry
+    
+    Example use case:
+    |   import tkinter as tk
+    |
+    |   m = tk.Tk()                               # init tkinter window
+    |   name_les = LabelEntryS(m, "Name")         # Make LEF for Height value
+    |   name_les.set("David")                     # Make default value 15.0
+    |   print(name_les.get())                     # Get current value of LEF
+    |   name_les.grid(row = 0, column = 0)
+    |   m.mainloop()
+    '''
+    def __init__(self, m, text) -> None:
+        self.label = tk.Label(m, text = text)
+        self.str = tk.StringVar(value = "")
+        self.entry = tk.Entry(m, textvariable = self.str)
+        
+    def set(self, x):
+        self.str.set(x)
+    def get(self):
+        return self.str.get()
+    def hide(self):
+        self.label.grid_forget()
+        self.label.pack_forget()
+        self.entry.grid_forget()
+        self.entry.pack_forget()
+    def grid(self, row = 0, column = 0):
+        self.label.grid(row = row, column = column)
+        self.entry.grid(row = row, column = column + 1)
+
+class CheckB:
+    def __init__(self, m, text, value = False, command = None) -> None:
+        self.bool = tk.BooleanVar(value = value)
+        if command != None:
+            self.check = tk.Checkbutton(m, text = text,
+                                    variable = self.bool,
+                                    onvalue = True,
+                                    offvalue = False,
+                                    command = command)
+        else: 
+            self.check = tk.Checkbutton(m, text = text,
+                                    variable = self.bool,
+                                    onvalue = True,
+                                    offvalue = False)            
+
+            
+    def set(self, x):
+        self.bool.set()
+    def get(self):
+        return self.bool.get()
+    def hide(self):
+        self.check.grid_forget()
+        self.check.pack_forget()
+    def grid(self, row = 0, column = 0):
+        self.check.grid(row = row, column = column)
 
 class CreateToolTip(object): # shortened to ttp in var names
     """
@@ -187,9 +266,10 @@ if __name__ == "__main__":      # Stops bad run of main.py
 
 
     # Local Functions
+    # TODO: hotstart, pbc, wavemaker, title
     def generate():
         print("Generating input.txt")
-        if overwrite.get():
+        if overwrite_cb.get():
             filename = os.path.join(cwd, "input.txt")
         else:
             filename = uniquify(os.path.join(cwd, "input.txt"))
@@ -218,30 +298,61 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f.close()
 
     # Window Params
-    m.geometry("1000x500")
+    m.geometry("1400x600")
     m.bind("<Configure>", center)
 
     # Frames
+    title_frame = tk.Frame(m)
     parallel_frame = tk.Frame(m)
     dimension_frame = tk.Frame(m)
     time_frame = tk.Frame(m)
     depth_frame = tk.Frame(m)
-    hotstart_frame = tk.Frame(m)
     physics_frame = tk.Frame(m)
     numerics_frame = tk.Frame(m)
+    hotstart_frame = tk.Frame(m)
+    init_frame = tk.Frame(m)
     sponge_frame = tk.Frame(m)
     wavemaker_frame = tk.Frame(m)
     pbc_frame = tk.Frame(m)
     igp_frame = tk.Frame(m)
-    parallel_frame.grid(row = 0, column = 0, sticky = "W")
-    dimension_frame.grid(row = 1, column = 0, sticky = "W")
-    time_frame.grid(row = 2, column = 0, sticky = "W")
-    depth_frame.grid(row = 3, column = 0, sticky = "W")
+    # column 0
+    title_frame.grid(row = 0, 
+                     sticky = "NW", pady = 5)
+    parallel_frame.grid(row = 2, column = 0, 
+                        sticky = "NW", pady = 5)
+    dimension_frame.grid(row = 3, column = 0, 
+                         sticky = "NW", pady = 5)
+    time_frame.grid(row = 4, column = 0, 
+                    sticky = "NW", pady = 5)
+    depth_frame.grid(row = 5, column = 0, 
+                     sticky = "NW", pady = 5)
+    
+    # column 1
+    physics_frame.grid(row = 0, column = 1, 
+                  rowspan = 5, sticky = "NW")
+    
+    # column 2
+    pbc_frame.grid(row = 0, column = 2, sticky = "SW")
+    wavemaker_frame.grid(row = 1, column = 2, rowspan = 8, sticky = "NW")
+    
+    # column 3
+    hotstart_frame.grid(row = 0, column = 3, 
+                        rowspan = 3, sticky = "NW")
+    init_frame.grid(row = 3, column = 3,
+                    rowspan = 2, sticky = "NW")
 
-    wavemaker_frame.grid(row = 0, column = 1, rowspan = 4, sticky = "N")
-    pbc_frame.grid(row = 4, column = 1, sticky = "N")
-    igp_frame.grid(row = 10, column = 3, sticky = "S")
-
+    # column max
+    igp_frame.grid(rowspan = 8, column = 8, sticky = "SW")
+    
+    # row column weigthing system
+    m.columnconfigure(0, weight = 1)
+    m.columnconfigure(1, weight = 1)
+    m.columnconfigure(2, weight = 1)
+    m.rowconfigure(7, weight = 1)
+    # Title Widgets
+    title_les = LabelEntryS(title_frame, "Log Title")
+    title_les.set("model1")
+    title_les.grid(row = 0)
     # Parallel Widgets
     parallel_label = tk.Label(parallel_frame, text = "Parallelization Arguments")
     px_led = LabelEntryD(parallel_frame, "PX")
@@ -249,11 +360,11 @@ if __name__ == "__main__":      # Stops bad run of main.py
     px_led.set(os.cpu_count() / 2)
     py_led.set(1)
     # parallel pos
-    parallel_label.grid(row = 0, columnspan = 2, sticky = "W")
-    px_led.label.grid(row = 2, column = 0)
-    px_led.entry.grid(row = 2, column = 1)
-    py_led.label.grid(row = 3, column = 0)
-    py_led.entry.grid(row = 3, column = 1)
+    parallel_label.grid(row = 0, columnspan = 3, sticky = "W")
+    px_led.entry.configure(width = 5)
+    py_led.entry.configure(width = 5)
+    px_led.grid(row = 1, column = 0)
+    py_led.grid(row = 1, column = 2)
     # ttp
     parallel_label_ttp = CreateToolTip(parallel_label, "PX, PY - Processor Numbers in X\nNOTE: Correlates to mpirun -np n (px*py)")
     px_led_ttp = CreateToolTip(px_led.label, "PX - Processor Numbers in X")
@@ -271,31 +382,42 @@ if __name__ == "__main__":      # Stops bad run of main.py
     dy_lef.set(1.0)
     # dimension pos
     dimension_label.grid(row = 0, columnspan = 2, sticky = "W")
-    mglob_led.label.grid(row = 1, column = 0)
-    mglob_led.entry.grid(row = 1, column = 1)
-    nglob_led.label.grid(row = 2, column = 0)
-    nglob_led.entry.grid(row = 2, column = 1)
-    dx_lef.label.grid(row = 3, column = 0)
-    dx_lef.entry.grid(row = 3, column = 1)
-    dy_lef.label.grid(row = 4, column = 0)
-    dy_lef.entry.grid(row = 4, column = 1)
+    mglob_led.grid(row = 1, column = 0)
+    nglob_led.grid(row = 2, column = 0)
+    dx_lef.grid(row = 3, column = 0)
+    dy_lef.grid(row = 4, column = 0)
 
     # Time Widgets
     time_label = tk.Label(time_frame, text = "Time Arguments")
     time_total_lef = LabelEntryF(time_frame, "Total Time (s)")
     plot_int_lef = LabelEntryF(time_frame, "Output Interval (s)")
     screen_int_lef = LabelEntryF(time_frame, text = "Console Interval (s)")
+    plot_start_lef = LabelEntryF(time_frame, "Output Start Time (s)")
+    def onCheckFixedDt():
+        if fixed_dt_check.get():
+            show_dt()
+        else:
+            hide_dt()
+    fixed_dt_check = CheckB(time_frame, text = "Fixed dt",
+                       value = False, command = onCheckFixedDt)
+    dt_lef = LabelEntryF(time_frame, 'dt (s)')
     time_total_lef.set(300.0)
     plot_int_lef.set(1.0)
     screen_int_lef.set(1.0)
+    plot_start_lef.set(0.0)
+    dt_lef.set(1.0)
     # time pos
     time_label.grid(row = 0, columnspan = 2, sticky = "W")
-    time_total_lef.label.grid(row = 1, column = 0)
-    time_total_lef.entry.grid(row = 1, column = 1)
-    plot_int_lef.label.grid(row = 2, column = 0)
-    plot_int_lef.entry.grid(row = 2, column = 1)
-    screen_int_lef.label.grid(row = 3, column = 0)
-    screen_int_lef.entry.grid(row = 3, column = 1)
+    time_total_lef.grid(row = 1, column = 0)
+    plot_int_lef.grid(row = 2, column = 0)
+    screen_int_lef.grid(row = 3, column = 0)
+    plot_start_lef.grid(row = 4, column = 0)
+    fixed_dt_check.check.grid(row = 5, column = 0, sticky = "W")
+
+    def show_dt():
+        dt_lef.grid(row = 6, column = 0)
+    def hide_dt():
+        dt_lef.hide()
 
     # Depth Widgets
     def onCheckDepth():
@@ -339,11 +461,10 @@ if __name__ == "__main__":      # Stops bad run of main.py
                                  variable = isSlope, command = onCheckDepth)
     depth_data_check = tk.Checkbutton(depth_frame, text = "Data",
                                 variable = isDepthData, command = onCheckDepth)
-    depth_flat_lef = LabelEntryF(depth_frame, "Bottom Depth (m)")
+    depth_flat_lef = LabelEntryF(depth_frame, "Depth (m)")
     slope_lef = LabelEntryF(depth_frame, "Slope")
-    xslope_lef = LabelEntryF(depth_frame, "Slope X Pos (m)")
-    depth_data_label = tk.Label(depth_frame, text = "Filename")
-    depth_data_entry = tk.Entry(depth_frame, textvariable= depth_data)
+    xslope_lef = LabelEntryF(depth_frame, "X Pos (m)")
+    depth_data_les = LabelEntryS(depth_frame, " File name")
     depth_flat_lef.set(10.0)     
     slope_lef.set(0.05)
     xslope_lef.set(400)
@@ -352,32 +473,138 @@ if __name__ == "__main__":      # Stops bad run of main.py
     flat_check.grid(row = 2, column = 0, sticky = "W")
     slope_check.grid(row = 3, column = 0, sticky = "W")
     depth_data_check.grid(row = 4, column = 0, sticky = "W")
-    depth_flat_lef.label.grid(row = 2, column = 1)
-    depth_flat_lef.entry.grid(row = 2, column = 2)
+    depth_flat_lef.grid(row = 2, column = 1)
     # support funcs
     def show_flat_lef():
-        depth_flat_lef.label.grid(row = 2, column = 1)
-        depth_flat_lef.entry.grid(row = 2, column = 2)
+        depth_flat_lef.grid(row = 2, column = 1)
     def show_slope_lef():
-        depth_flat_lef.label.grid(row = 2, column = 1)
-        depth_flat_lef.entry.grid(row = 2, column = 2)
-        slope_lef.label.grid(row = 3, column = 1)
-        slope_lef.entry.grid(row = 3, column = 2)
-        xslope_lef.label.grid(row = 4, column = 1)
-        xslope_lef.entry.grid(row = 4, column = 2)
+        depth_flat_lef.grid(row = 2, column = 1)
+        slope_lef.grid(row = 3, column = 1)
+        xslope_lef.grid(row = 4, column = 1)
     def show_data():
-        depth_data_label.grid(row = 2, column = 1)
-        depth_data_entry.grid(row = 2, column = 2)
+        depth_data_les.grid(row = 2, column = 1)
     def hide_depth_entries():
-        depth_flat_lef.label.grid_forget()
-        depth_flat_lef.entry.grid_forget()
-        slope_lef.label.grid_forget()
-        slope_lef.entry.grid_forget()
-        xslope_lef.label.grid_forget()
-        xslope_lef.entry.grid_forget()
-        depth_data_label.grid_forget()
-        depth_data_entry.grid_forget()
+        depth_flat_lef.hide()
+        slope_lef.hide()
+        xslope_lef.hide()
+        depth_data_les.hide()
         pass
+    
+    # Physics Widgets
+    physics_label = tk.Label(physics_frame, text = "Physics Arguments")
+    dispersion_check = CheckB(physics_frame, "Dispersion",
+                              value = True)
+    gamma1_lef = LabelEntryF(physics_frame, "Gamma1")
+    gamma2_lef = LabelEntryF(physics_frame, "Gamma2")
+    gamma3_lef = LabelEntryF(physics_frame, "Gamma3")
+    beta_lef = LabelEntryF(physics_frame, text = "Beta")
+    def onCheckViscosityBreaking():
+        if viscosity_breaking_check.get():
+            show_breaking_entries()
+        else:
+            hide_breaking_entries()
+    viscosity_breaking_check = CheckB(physics_frame, text = "Viscosity Breaking",
+                                      value = False, command = onCheckViscosityBreaking)
+    cbrk1_lef = LabelEntryF(physics_frame, text = "c1")
+    cbrk2_lef = LabelEntryF(physics_frame, text = "c2")
+    swe_eta_lef = LabelEntryF(physics_frame, text = "Ratio for NSWE")
+    roller_effect_check = CheckB(physics_frame, text = "Roller Effect",
+                                 value = False)
+    friction_label = tk.Label(physics_frame, text = "Friction Specification")
+    def onCheckFrictionMatrix():
+        if friction_matrix_check.get():
+            friction_matrix_les.grid(row = 14)
+        else:
+            friction_matrix_les.hide()
+
+    friction_matrix_check = CheckB(physics_frame, text = "Friction Matrix",
+                                   command = onCheckFrictionMatrix)
+    friction_matrix_les = LabelEntryF(physics_frame, text = "Matrix File")
+    cd_fixed_lef = LabelEntryF(physics_frame, text = "Bottom Friction Coef")
+    show_breaking_check = CheckB(physics_frame, text = "Calculate Breaking Index")
+
+    gamma1_lef.set(1.0)
+    gamma2_lef.set(1.0)
+    gamma3_lef.set(1.0)
+    beta_lef.set(-0.531)
+    cbrk1_lef.set(0.45)
+    cbrk2_lef.set(0.35)
+    swe_eta_lef.set(0.8)
+
+    physics_label.grid(row = 0, columnspan = 2, sticky = "W")
+    dispersion_check.check.grid(row = 1, sticky = "W")
+    gamma1_lef.grid(row = 2)
+    gamma2_lef.grid(row = 3)
+    gamma3_lef.grid(row = 4)
+    beta_lef.grid(row = 5)
+    swe_eta_lef.grid(row = 6)
+    roller_effect_check.check.grid(row = 7, sticky = "W")
+    viscosity_breaking_check.check.grid(row = 8, sticky = "W")
+    def show_breaking_entries():
+        cbrk1_lef.grid(row = 9)
+        cbrk2_lef.grid(row = 10)
+    def hide_breaking_entries():
+        cbrk1_lef.hide()
+        cbrk2_lef.hide()
+    friction_label.grid(row = 11, sticky = "W")
+    cd_fixed_lef.grid(row = 12)
+    friction_matrix_check.check.grid(row = 13, sticky = "W")
+        
+    # Hot Start
+    def onCheckHotStart():
+        if hotstart_check.get():   
+            show_hotstart_entries()
+        else:
+            hide_hotstart_entries()
+    hotstart_check = CheckB(hotstart_frame, "Hot Start",
+                        value = False, command = onCheckHotStart)
+    filenum_hot_led = LabelEntryD(hotstart_frame, 
+                                  "Initial Enumeration")
+    hotstart_int_lef = LabelEntryF(hotstart_frame,
+                                  "Hot Start Time (s)")
+    hotstart_check.check.grid(row = 0, sticky = "W")
+    def show_hotstart_entries():
+        filenum_hot_led.grid(row = 1)
+        hotstart_int_lef.grid(row = 2)
+    def hide_hotstart_entries():
+        filenum_hot_led.hide()
+        hotstart_int_lef.hide()
+
+    # Initial Condition
+    def onCheckInit():
+        if init_check.get():
+            show_init_entries()
+        else:
+            hide_init_entries()
+    def onCheckInitMask():
+        if init_mask_check.get():
+            show_init_mask_entry()
+        else:
+            hide_init_mask_entry()
+    init_check = CheckB(init_frame, "Initial Condition",
+                        value = False, command = onCheckInit)
+    init_eta_les = LabelEntryS(init_frame, "Initial Eta File")
+    init_u_les = LabelEntryS(init_frame, "Initial U File")
+    init_v_les = LabelEntryS(init_frame, "Initial V File")
+    init_mask_check = CheckB(init_frame, "Initial Mask",
+                             value = False, command = onCheckInitMask)
+    init_mask_les = LabelEntryS(init_frame, "Mask File")
+    
+    init_check.check.grid(row = 0, columnspan = 2, sticky = "NW")
+    def show_init_entries():
+        init_u_les.grid(row = 1)
+        init_v_les.grid(row = 2)
+        init_mask_check.grid(row = 3)
+    def hide_init_entries():
+        init_u_les.hide()
+        init_v_les.hide()
+        init_mask_check.hide()
+        init_mask_les.hide()
+    def show_init_mask_entry():
+        init_mask_les.grid(row = 4)
+        print("show")
+    def hide_init_mask_entry():
+        init_mask_les.hide()
     
     # Wavemaker widgets
     isWavemaker = tk.BooleanVar(value = False)
@@ -401,31 +628,147 @@ if __name__ == "__main__":      # Stops bad run of main.py
     wavemaker_scrollbar = ttk.Scrollbar(wavemaker_frame, orient = tk.VERTICAL,
                                         command = wavemaker_list.yview)
     wavemaker_list['yscrollcommand'] = wavemaker_scrollbar
+    # wavemaker Params
+    wavemaker_break_lef = LabelEntryF(wavemaker_frame, text = "Breaking Parameter")
+    xc_wk_lef = LabelEntryF(wavemaker_frame, text = "X (m)")
+    yc_wk_lef = LabelEntryF(wavemaker_frame, text = "Y (m)")
+    ywidth_wk_lef = LabelEntryF(wavemaker_frame, text = "Y Width (m)")
+    tperiod_lef = LabelEntryF(wavemaker_frame, text = "Period (s)")
+    amp_wk_lef = LabelEntryF(wavemaker_frame, text = "Amplitude (m)")
+    dep_wk_lef = LabelEntryF(wavemaker_frame, text = "Water Depth (m)")
+    theta_wk_lef = LabelEntryF(wavemaker_frame, text = "Theta (deg)")
+    time_ramp_lef = LabelEntryF(wavemaker_frame, text = "Time Ramp (s)")
+    freqpeak_lef = LabelEntryF(wavemaker_frame, text = "Peak Freq (1/s)")
+    delta_wk_lef = LabelEntryF(wavemaker_frame, text = "Delta")
+    freqmin_lef = LabelEntryF(wavemaker_frame, text = "Min Freq (1/s)")
+    freqmax_lef = LabelEntryF(wavemaker_frame, text = "Max Freq (1/2)")
+    hmo_lef = LabelEntryF(wavemaker_frame, text = "Hmo (m)")
+    gamma_tma_lef = LabelEntryF(wavemaker_frame, text = "Gamma")
+    theta_peak_lef = LabelEntryF(wavemaker_frame, text = "Theta Peak")
+    nfreq_led = LabelEntryD(wavemaker_frame, text = "Num Freq")
+    ntheta_led = LabelEntryD(wavemaker_frame, text = "Num Theta")
+    equal_energy = tk.BooleanVar(value = False)
+    equal_energy_check = tk.Checkbutton(wavemaker_frame, text = "Equal Energy",
+                                        variable = equal_energy)
     wavemaker_list.select_set(0)
+    wavemaker_break_lef.set(cbrk1_lef.get())
+    gamma_tma_lef.set(3.3)
+    theta_peak_lef.set(0.0)
+    nfreq_led.set(45)
+    ntheta_led.set(24)
+
+    # use Default Checkbutton
+    use_defaults_wk = tk.BooleanVar(value = True)
+    def toggle_defaults_wk():
+        toggle_wavemaker_entries(None)
+    use_defaults_wk_check = tk.Checkbutton(wavemaker_frame, text = "Use Defaults",
+                                           variable = use_defaults_wk, command = toggle_defaults_wk)
     # wavemaker pos
     wavemaker_check.grid(row = 0, columnspan = 2, sticky = tk.N + tk.W)
     def show_wavemaker():
-        wavemaker_list.grid(row = 1, column = 0)
-        wavemaker_scrollbar.grid(row = 1, column = 1)
-        toggle_wavemaker_entries("meme")
+        wavemaker_break_lef.grid(row = 1)
+        wavemaker_list.grid(row = 2, columnspan = 2)
+        wavemaker_scrollbar.grid(row = 2, column = 3)
+        toggle_wavemaker_entries("")
     def hide_wavemaker():
+        wavemaker_break_lef.hide()
         wavemaker_list.grid_forget()
+        wavemaker_scrollbar.grid_forget()
+        hide_wavemaker_entries()
+    def hide_wavemaker_entries():
+        use_defaults_wk_check.grid_forget()
+        use_defaults_wk_check.pack_forget()
+        xc_wk_lef.hide()
+        yc_wk_lef.hide()
+        ywidth_wk_lef.hide()
+        tperiod_lef.hide()
+        amp_wk_lef.hide()
+        dep_wk_lef.hide()
+        theta_wk_lef.hide()
+        time_ramp_lef.hide()
+        delta_wk_lef.hide()
+        freqpeak_lef.hide()
+        freqmin_lef.hide()
+        freqmax_lef.hide()
+        hmo_lef.hide()
+        gamma_tma_lef.hide()
+        theta_peak_lef.hide()
+        nfreq_led.hide()
+        ntheta_led.hide()
+        equal_energy_check.grid_forget()
+        use_defaults_wk_check.grid_forget()
     def toggle_wavemaker_entries(event):
-        pass
+        hide_wavemaker_entries()
+        curwavemaker = wavemaker_list.get(wavemaker_list.curselection()[0])
+        if 'WK_REG' in curwavemaker:
+            xc_wk_lef.grid(row = 3)
+            yc_wk_lef.grid(row = 4)
+            ywidth_wk_lef.grid(row = 5)
+            tperiod_lef.grid(row = 6)
+            amp_wk_lef.grid(row = 7)
+            dep_wk_lef.grid(row = 8)
+            theta_wk_lef.grid(row = 9)
+            time_ramp_lef.grid(row = 10)
+        elif 'WK_IRR' in curwavemaker:
+            xc_wk_lef.grid(row = 3)
+            yc_wk_lef.grid(row = 4)
+            ywidth_wk_lef.grid(row = 5)
+            dep_wk_lef.grid(row = 6)
+            time_ramp_lef.grid(row = 7)
+            delta_wk_lef.grid(row = 8)
+            freqpeak_lef.grid(row = 9)
+            freqmin_lef.grid(row = 10)
+            freqmax_lef.grid(row = 11)
+            hmo_lef.grid(row = 12)
+            use_defaults_wk_check.grid(row = 13)
+            if not use_defaults_wk.get():
+                gamma_tma_lef.grid(row = 14)
+                theta_peak_lef.grid(row = 15)
+                nfreq_led.grid(row = 16)
+                ntheta_led.grid(row = 17)
+                equal_energy_check.grid(row = 18)
+        elif 'WK_NEW_IRR' in curwavemaker:
+            pass
+        elif 'JON_2D' in curwavemaker:
+            pass
+        elif 'JON_1D' in curwavemaker:
+            pass
+        elif 'TMA_1D' in curwavemaker:
+            pass
+        elif 'WK_NEW_DATA_2D' in curwavemaker:
+            pass
+        elif 'WK_DATA2D' in curwavemaker:
+            pass
+        elif 'WK_NEW_DATA_2D' in curwavemaker:
+            pass
+        elif 'LEFT_BC_IRR' in curwavemaker:
+            pass
+        elif 'LEF_SOL' in curwavemaker:
+            pass
+        elif 'INI_SOL' in curwavemaker:
+            pass
+        elif 'INI_REC' in curwavemaker:
+            pass
+        elif 'INI_GAU' in curwavemaker:
+            pass
     wavemaker_list.bind('<<ListboxSelect>>', toggle_wavemaker_entries)
 
     # periodic boundary condition widgets
+    pbc_cb = CheckB(pbc_frame, "Periodic Boundary Condition")
+    pbc_cb.grid(row = 0)
+    
+
+    # warnings widget
+    warnings_text = tk.Text()
 
     # input generation/params widgets and frame
-    overwrite = tk.BooleanVar(value = True)
-    overwrite_check = tk.Checkbutton(igp_frame, text = "Overwrite?", variable = overwrite,
-                                     onvalue = True, offvalue = False)
+    overwrite_cb = CheckB(igp_frame, text = "Overwrite?", value = True)
     gen_button = tk.Button(igp_frame, text = "Generate",
                            width = 25, height = 3,
                            command = generate)
-    gen_button.pack(side = tk.BOTTOM)
-    overwrite_check.pack(side = tk.BOTTOM)
+    gen_button.grid(row = 1)
+    overwrite_cb.grid(row = 0)
 
-    overwrite_check_ttp = CreateToolTip(overwrite_check, "Overwrites input.txt file when checked")
+    overwrite_check_ttp = CreateToolTip(overwrite_cb.check, "Overwrites input.txt file when checked")
     m.mainloop()
 
