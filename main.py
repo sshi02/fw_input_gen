@@ -295,6 +295,8 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f.write(f"TOTAL_TIME ={time_total_lef.get() : f}\n")
         f.write(f"PLOT_INTV ={plot_int_lef.get() : f}\n")
         f.write(f"SCREEN_INTV ={screen_int_lef.get() : f}\n")
+        if (hotstart_check.get()):
+            pass
         f.close()
 
     # Window Params
@@ -314,6 +316,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     sponge_frame = tk.Frame(m)
     wavemaker_frame = tk.Frame(m)
     pbc_frame = tk.Frame(m)
+    warnings_frame = tk.Frame(m)
     igp_frame = tk.Frame(m)
     # column 0
     title_frame.grid(row = 0, 
@@ -326,29 +329,27 @@ if __name__ == "__main__":      # Stops bad run of main.py
                     sticky = "NW", pady = 5)
     depth_frame.grid(row = 5, column = 0, 
                      sticky = "NW", pady = 5)
-    
     # column 1
     physics_frame.grid(row = 0, column = 1, 
                   rowspan = 5, sticky = "NW")
-    
     # column 2
     pbc_frame.grid(row = 0, column = 2, sticky = "SW")
     wavemaker_frame.grid(row = 1, column = 2, rowspan = 8, sticky = "NW")
-    
     # column 3
     hotstart_frame.grid(row = 0, column = 3, 
                         rowspan = 3, sticky = "NW")
     init_frame.grid(row = 3, column = 3,
                     rowspan = 2, sticky = "NW")
-
     # column max
-    igp_frame.grid(rowspan = 8, column = 8, sticky = "SW")
+    warnings_frame.grid(row = 2, column = 8, 
+                        rowspan = 4)
+    igp_frame.grid(row = 9, column = 8, sticky = "SW")
     
     # row column weigthing system
     m.columnconfigure(0, weight = 1)
     m.columnconfigure(1, weight = 1)
     m.columnconfigure(2, weight = 1)
-    m.rowconfigure(7, weight = 1)
+    m.rowconfigure(8, weight = 1)
     # Title Widgets
     title_les = LabelEntryS(title_frame, "Log Title")
     title_les.set("model1")
@@ -376,8 +377,8 @@ if __name__ == "__main__":      # Stops bad run of main.py
     nglob_led = LabelEntryD(dimension_frame, "Nglob")
     dx_lef = LabelEntryF(dimension_frame, "dx (m)")
     dy_lef = LabelEntryF(dimension_frame, "dy (m)")
-    mglob_led.set(500)
-    nglob_led.set(500)
+    mglob_led.set(0)
+    nglob_led.set(0)
     dx_lef.set(1.0)
     dy_lef.set(1.0)
     # dimension pos
@@ -519,7 +520,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
 
     friction_matrix_check = CheckB(physics_frame, text = "Friction Matrix",
                                    command = onCheckFrictionMatrix)
-    friction_matrix_les = LabelEntryF(physics_frame, text = "Matrix File")
+    friction_matrix_les = LabelEntryS(physics_frame, text = "Matrix File")
     cd_fixed_lef = LabelEntryF(physics_frame, text = "Bottom Friction Coef")
     show_breaking_check = CheckB(physics_frame, text = "Calculate Breaking Index")
 
@@ -668,7 +669,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     def show_wavemaker():
         wavemaker_break_lef.grid(row = 1)
         wavemaker_list.grid(row = 2, columnspan = 2)
-        wavemaker_scrollbar.grid(row = 2, column = 3)
+        wavemaker_scrollbar.grid(row = 2, column = 3, sticky = "NSE")
         toggle_wavemaker_entries("")
     def hide_wavemaker():
         wavemaker_break_lef.hide()
@@ -698,9 +699,11 @@ if __name__ == "__main__":      # Stops bad run of main.py
         equal_energy_check.grid_forget()
         use_defaults_wk_check.grid_forget()
     def toggle_wavemaker_entries(event):
+        global wavemaker
         hide_wavemaker_entries()
         curwavemaker = wavemaker_list.get(wavemaker_list.curselection()[0])
         if 'WK_REG' in curwavemaker:
+            wavemaker = 'WK_REG'
             xc_wk_lef.grid(row = 3)
             yc_wk_lef.grid(row = 4)
             ywidth_wk_lef.grid(row = 5)
@@ -710,6 +713,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             theta_wk_lef.grid(row = 9)
             time_ramp_lef.grid(row = 10)
         elif 'WK_IRR' in curwavemaker:
+            wavemaker = 'WK_IRR'
             xc_wk_lef.grid(row = 3)
             yc_wk_lef.grid(row = 4)
             ywidth_wk_lef.grid(row = 5)
@@ -728,28 +732,38 @@ if __name__ == "__main__":      # Stops bad run of main.py
                 ntheta_led.grid(row = 17)
                 equal_energy_check.grid(row = 18)
         elif 'WK_NEW_IRR' in curwavemaker:
+            wavemaker = 'WK_NEW_IRR'
             pass
         elif 'JON_2D' in curwavemaker:
+            wavemaker = "JON_2D"
             pass
         elif 'JON_1D' in curwavemaker:
+            wavemaker = "JON_1D"
             pass
         elif 'TMA_1D' in curwavemaker:
+            wavemaker = "TMA_1D"
             pass
         elif 'WK_NEW_DATA_2D' in curwavemaker:
+            wavemaker = "WK_NEW_DATA_2D"
             pass
         elif 'WK_DATA2D' in curwavemaker:
-            pass
+            wavemaker = "WK_DATA2D"
         elif 'WK_NEW_DATA_2D' in curwavemaker:
-            pass
+            wavemaker = 'WK_NEW_DATA_2D'
         elif 'LEFT_BC_IRR' in curwavemaker:
+            wavemaker = "WK_LEFT_BC_IRR"
             pass
         elif 'LEF_SOL' in curwavemaker:
+            wavemaker = "LEF_SOL"
             pass
         elif 'INI_SOL' in curwavemaker:
+            wavemaker = "INI_SOL"
             pass
         elif 'INI_REC' in curwavemaker:
+            wavemaker = "INI_REC"
             pass
         elif 'INI_GAU' in curwavemaker:
+            wavemaker = "INI_GAU"
             pass
     wavemaker_list.bind('<<ListboxSelect>>', toggle_wavemaker_entries)
 
@@ -758,8 +772,60 @@ if __name__ == "__main__":      # Stops bad run of main.py
     pbc_cb.grid(row = 0)
     
 
-    # warnings widget
-    warnings_text = tk.Text()
+    # warnings system
+    # widget
+    warnings_button = tk.Button(warnings_frame, text = "Validate")
+    warnings_text = tk.Text(warnings_frame, height = 10, width = 40, wrap = tk.WORD)
+    warnings_text.config(state = tk.DISABLED)
+    warnings_scrollbar = ttk.Scrollbar(warnings_frame, orient = tk.VERTICAL,
+                                        command = warnings_text.yview)
+    warnings_text['yscrollcommand'] = warnings_scrollbar
+    # main warnings logic function
+    def validate():
+        counter = 0
+        # support function
+        def insert(message):
+            nonlocal counter
+            warnings_text.insert(tk.END, "- " + message + "\n")
+            counter += 1
+        warnings_text.config(state = tk.NORMAL)
+        warnings_text.delete('1.0', tk.END)
+        ### Insert validation checks here 
+        ## Model Validity Test
+        if (mglob_led.get() == 0 or nglob_led.get() == 0
+            or dx_lef.get() == 0 or dy_lef.get() == 0):
+            insert("Global dimensions evaluate to 0")
+        # wavemaker validation
+        if isWavemaker.get():
+            match wavemaker:
+                case 'WK_REG':
+                    # Bounds Checks
+                    if (xc_wk_lef.get() > mglob_led.get() * dx_lef.get()):
+                        insert("Out of Bounds x coordinate for wave maker")
+                    if (yc_wk_lef.get() > nglob_led.get() * dy_lef.get()):
+                        insert("Out of Bounds y coordinate for wave maker")
+                    if (ywidth_wk_lef.get() > nglob_led.get() * dy_lef.get()):
+                        insert("Invalid wave maker y width")
+                    # Wave Validity
+                    wavelength = 9.8 * tperiod_lef.get() * tperiod_lef.get() / 2 / 3.14
+                    if (isFlat or isSlope) and wavelength > 2 * depth_flat_lef.get():
+                        insert("Wave maker produces waves outside of resolution (lambda > 2h)")
+                case 'WK_IRR':
+                    pass
+        ## File Checks
+        if (isDepthData.get() and depth_data_les.get() == ""):
+            insert("Depth data file not specified")
+        if (friction_matrix_check.get() and friction_matrix_les.get() == ""):
+            insert("Friction matrix file not specified")
+        ### Cleanup and warnings counter
+        warnings_text.insert("1.0", f"{counter :d} warnings\n")
+        warnings_text.config(state = tk.DISABLED)
+    warnings_button.configure(command = validate)
+    # position
+    warnings_button.grid(columnspan = 2)
+    warnings_text.grid(row = 1)
+    warnings_scrollbar.grid(row = 1, column = 2,
+                            sticky = 'NSE')
 
     # input generation/params widgets and frame
     overwrite_cb = CheckB(igp_frame, text = "Overwrite?", value = True)
