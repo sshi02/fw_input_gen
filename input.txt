@@ -23,11 +23,19 @@ DEPTH_FLAT = 10.000000
 RESULT_FOLDER = output/
 ! ------------------DIMENSION-----------------------------
 ! global grid dimension
-Mglob = 500
-Nglob = 500
+Mglob = 0
+Nglob = 0
 ! ----------------- TIME----------------------------------
 ! time: total computational time/ plot time / screen interval
 ! all in seconds
 TOTAL_TIME = 300.000000
 PLOT_INTV = 1.000000
 SCREEN_INTV = 1.000000
+! ----------------PHYSICS------------------------------
+! parameters to control type of equations
+! dispersion: all dispersive terms
+! gamma1=1.0,gamma2=1.0: defalt: Fully nonlinear equationsDISPERSION = TGamma1 = 1.000000
+Gamma2 = 1.000000
+Gamma3 = 1.000000
+Beta_ref = -0.531000
+VISCOSITY BREAKING

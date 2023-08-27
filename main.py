@@ -171,6 +171,27 @@ class CheckB:
     def grid(self, row = 0, column = 0):
         self.check.grid(row = row, column = column)
 
+class LabelCombo:
+    def __init__(self, m, text, arr) -> None:
+        self.label = tk.Label(m, text = text)
+        self.str = tk.StringVar()
+        self.combo = ttk.Combobox(m, textvariable = self.str)
+        self.combo['values'] = arr
+    
+    def set(self, x):
+        self.str.set(x)
+        self.combo.set(x)
+    def get(self):
+        return self.str.get()
+    def hide(self):
+        self.label.grid_forget()
+        self.label.pack_forget()     
+        self.combo.grid_forget()
+        self.combo.pack_forget()           
+    def grid(self, row = 0, column = 0):
+        self.label.grid(row = row, column = column)
+        self.combo.grid(row = row, column = column + 1)
+
 class CreateToolTip(object): # shortened to ttp in var names
     """
     Create a tooltip for a given widget, so when user hovers over a widget, a textbox/tooltip
@@ -256,17 +277,18 @@ def uniquify(path):
         counter += 1
     return path
 
+#####################################
 ### main body
 if __name__ == "__main__":      # Stops bad run of main.py
+    def debug():
+        debug_print()
     m = tk.Tk()
     cwd = os.path.dirname(os.path.realpath(__file__))
-    log_title = "model1"
     output_folder = "output/"
     init_station = tk.BooleanVar(value = False)
 
-
-    # Local Functions
-    # TODO: hotstart, pbc, wavemaker, title
+    ### Local Functions
+    # TODO: pbc, wavemaker, physics, numerics, ini cond
     def generate():
         print("Generating input.txt")
         if overwrite_cb.get():
@@ -276,7 +298,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f = open(filename, "w+")
         f.write("! INPUT FILE FOR FUNWAVE_TVD\n! NOTE: all input parameter are capital sensitive\n")
         f.write("! --------------------TITLE-------------------------------------\n! title only for log file\n")
-        f.write(f"TITLE ={log_title}\n\n")
+        f.write(f"TITLE ={title_les.get()}\n\n")
         f.write("! -------------------PARALLEL INFO-----------------------------\n!    PX,PY - processor numbers in X and Y\n!    NOTE: make sure consistency with mpirun -np n (px*py)\n")
         f.write(f"PX ={px_led.get() : .0f}\nPY ={py_led.get() : .0f}\n")
         f.write("! --------------------DEPTH-------------------------------------\n! Depth types, DEPTH_TYPE=DATA: from depth file\n!              DEPTH_TYPE=FLAT: idealized flat, need depth_flat\n!              DEPTH_TYPE=SLOPE: idealized slope,\n!                                 need slope,SLP starting point, Xslp\n!                                 and depth_flat\n")
@@ -296,14 +318,35 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f.write(f"PLOT_INTV ={plot_int_lef.get() : f}\n")
         f.write(f"SCREEN_INTV ={screen_int_lef.get() : f}\n")
         if (hotstart_check.get()):
-            pass
+            f.write(f"! -------------------HOT START---------------------------------\nHOT_START = F")
+            f.write(f"FileNumber_HOTSTART = {filenum_hot_led.get()}\n")
+            f.write(f"HOTSTART_INTV = {hotstart_int_lef.get() :f}\n")
+        f.write("! ----------------PHYSICS------------------------------\n! parameters to control type of equations\n! dispersion: all dispersive terms\n! gamma1=1.0,gamma2=1.0: defalt: Fully nonlinear equations\n")
+        if dispersion_check.get():
+            f.write(f"DISPERSION = T")
+        else:
+            f.write(f"DISPERSION = F")
+        f.write(f"Gamma1 = {gamma1_lef.get() :f}\n")
+        f.write(f"Gamma2 = {gamma2_lef.get() :f}\n")
+        f.write(f"Gamma3 = {gamma3_lef.get() :f}\n")
+        f.write(f"Beta_ref = {beta_lef.get() :f}\n")
+        if viscosity_breaking_check.get():
+            f.write(f"VISCOSITY_BREAKING = T\n")
+            f.write(f"Cbrk1 = {cbrk1_lef.get()}\n")
+            f.write(f"Cbrk2 = {cbrk2_lef.get()}\n")
+        else:
+            f.write(f"VISCOSITY_BREAKING = F\n")
+        f.write(f"SWE_ETA_DEP = {swe_eta_lef.get()}\n")
+        
+        
         f.close()
 
-    # Window Params
+    ### Window Params
     m.geometry("1400x600")
     m.bind("<Configure>", center)
 
-    # Frames
+    ### Frames
+    # TODO: sponge, shipwake, 
     title_frame = tk.Frame(m)
     parallel_frame = tk.Frame(m)
     dimension_frame = tk.Frame(m)
@@ -318,7 +361,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     pbc_frame = tk.Frame(m)
     warnings_frame = tk.Frame(m)
     igp_frame = tk.Frame(m)
-    # column 0
+    ## column 0
     title_frame.grid(row = 0, 
                      sticky = "NW", pady = 5)
     parallel_frame.grid(row = 2, column = 0, 
@@ -329,49 +372,52 @@ if __name__ == "__main__":      # Stops bad run of main.py
                     sticky = "NW", pady = 5)
     depth_frame.grid(row = 5, column = 0, 
                      sticky = "NW", pady = 5)
-    # column 1
+    ## column 1
     physics_frame.grid(row = 0, column = 1, 
-                  rowspan = 5, sticky = "NW")
-    # column 2
+                  rowspan = 5, sticky = "NW", pady = 5)
+    numerics_frame.grid(row = 5, column= 1,
+                        rowspan = 2, sticky = "NW", pady = 5)
+    ## column 2
     pbc_frame.grid(row = 0, column = 2, sticky = "SW")
     wavemaker_frame.grid(row = 1, column = 2, rowspan = 8, sticky = "NW")
-    # column 3
+    ## column 3
     hotstart_frame.grid(row = 0, column = 3, 
                         rowspan = 3, sticky = "NW")
     init_frame.grid(row = 3, column = 3,
                     rowspan = 2, sticky = "NW")
-    # column max
+    ## column max
     warnings_frame.grid(row = 2, column = 8, 
                         rowspan = 4)
     igp_frame.grid(row = 9, column = 8, sticky = "SW")
-    
-    # row column weigthing system
+    ## row column weigthing system
     m.columnconfigure(0, weight = 1)
     m.columnconfigure(1, weight = 1)
     m.columnconfigure(2, weight = 1)
     m.rowconfigure(8, weight = 1)
-    # Title Widgets
+    
+    ### Title Widgets
     title_les = LabelEntryS(title_frame, "Log Title")
     title_les.set("model1")
     title_les.grid(row = 0)
-    # Parallel Widgets
+
+    ### Parallel Widgets
     parallel_label = tk.Label(parallel_frame, text = "Parallelization Arguments")
     px_led = LabelEntryD(parallel_frame, "PX")
     py_led = LabelEntryD(parallel_frame, "PY")
     px_led.set(os.cpu_count() / 2)
     py_led.set(1)
-    # parallel pos
+    ## parallel pos
     parallel_label.grid(row = 0, columnspan = 3, sticky = "W")
     px_led.entry.configure(width = 5)
     py_led.entry.configure(width = 5)
     px_led.grid(row = 1, column = 0)
     py_led.grid(row = 1, column = 2)
-    # ttp
+    ## ttp
     parallel_label_ttp = CreateToolTip(parallel_label, "PX, PY - Processor Numbers in X\nNOTE: Correlates to mpirun -np n (px*py)")
     px_led_ttp = CreateToolTip(px_led.label, "PX - Processor Numbers in X")
     py_led_ttp = CreateToolTip(py_led.label, "PY - Processor Numbers in Y")
 
-    # Dimension/Grid Widgets
+    ### Dimension/Grid Widgets
     dimension_label = tk.Label(dimension_frame, text = "Dimension and Grid Size Arguments")
     mglob_led = LabelEntryD(dimension_frame, "Mglob")
     nglob_led = LabelEntryD(dimension_frame, "Nglob")
@@ -381,19 +427,20 @@ if __name__ == "__main__":      # Stops bad run of main.py
     nglob_led.set(0)
     dx_lef.set(1.0)
     dy_lef.set(1.0)
-    # dimension pos
+    ## dimension pos
     dimension_label.grid(row = 0, columnspan = 2, sticky = "W")
     mglob_led.grid(row = 1, column = 0)
     nglob_led.grid(row = 2, column = 0)
     dx_lef.grid(row = 3, column = 0)
     dy_lef.grid(row = 4, column = 0)
 
-    # Time Widgets
+    ### Time Widgets
     time_label = tk.Label(time_frame, text = "Time Arguments")
     time_total_lef = LabelEntryF(time_frame, "Total Time (s)")
     plot_int_lef = LabelEntryF(time_frame, "Output Interval (s)")
     screen_int_lef = LabelEntryF(time_frame, text = "Console Interval (s)")
     plot_start_lef = LabelEntryF(time_frame, "Output Start Time (s)")
+    # support function for fixed dt
     def onCheckFixedDt():
         if fixed_dt_check.get():
             show_dt()
@@ -407,20 +454,19 @@ if __name__ == "__main__":      # Stops bad run of main.py
     screen_int_lef.set(1.0)
     plot_start_lef.set(0.0)
     dt_lef.set(1.0)
-    # time pos
+    ## time pos
     time_label.grid(row = 0, columnspan = 2, sticky = "W")
     time_total_lef.grid(row = 1, column = 0)
     plot_int_lef.grid(row = 2, column = 0)
     screen_int_lef.grid(row = 3, column = 0)
     plot_start_lef.grid(row = 4, column = 0)
     fixed_dt_check.check.grid(row = 5, column = 0, sticky = "W")
-
     def show_dt():
         dt_lef.grid(row = 6, column = 0)
     def hide_dt():
         dt_lef.hide()
 
-    # Depth Widgets
+    ### Depth Widgets
     def onCheckDepth():
         global last_depth_check
         if 'FLAT' in last_depth_check:
@@ -448,13 +494,13 @@ if __name__ == "__main__":      # Stops bad run of main.py
         elif isDepthData.get():
             last_depth_check = 'DATA'
             show_data()
-    # widget vars
+    ## widget vars
     last_depth_check = 'FLAT'
     isFlat = tk.BooleanVar(value = True)
     isSlope = tk.BooleanVar(value = False)
     isDepthData = tk.BooleanVar(value = False)
     depth_data = tk.StringVar(value = "depth.txt")
-    # widgets
+    ## widgets
     depth_label = tk.Label(depth_frame, text = "Depth Type")
     flat_check = tk.Checkbutton(depth_frame, text = "Flat", 
                                 variable = isFlat, command = onCheckDepth)
@@ -469,13 +515,13 @@ if __name__ == "__main__":      # Stops bad run of main.py
     depth_flat_lef.set(10.0)     
     slope_lef.set(0.05)
     xslope_lef.set(400)
-    # depth pos
+    ## depth pos
     depth_label.grid(row = 1, columnspan = 2, sticky = "W")
     flat_check.grid(row = 2, column = 0, sticky = "W")
     slope_check.grid(row = 3, column = 0, sticky = "W")
     depth_data_check.grid(row = 4, column = 0, sticky = "W")
     depth_flat_lef.grid(row = 2, column = 1)
-    # support funcs
+    ## support funcs
     def show_flat_lef():
         depth_flat_lef.grid(row = 2, column = 1)
     def show_slope_lef():
@@ -491,7 +537,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         depth_data_les.hide()
         pass
     
-    # Physics Widgets
+    ### Physics Widgets
     physics_label = tk.Label(physics_frame, text = "Physics Arguments")
     dispersion_check = CheckB(physics_frame, "Dispersion",
                               value = True)
@@ -523,7 +569,6 @@ if __name__ == "__main__":      # Stops bad run of main.py
     friction_matrix_les = LabelEntryS(physics_frame, text = "Matrix File")
     cd_fixed_lef = LabelEntryF(physics_frame, text = "Bottom Friction Coef")
     show_breaking_check = CheckB(physics_frame, text = "Calculate Breaking Index")
-
     gamma1_lef.set(1.0)
     gamma2_lef.set(1.0)
     gamma3_lef.set(1.0)
@@ -531,7 +576,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     cbrk1_lef.set(0.45)
     cbrk2_lef.set(0.35)
     swe_eta_lef.set(0.8)
-
+    ## physics pos
     physics_label.grid(row = 0, columnspan = 2, sticky = "W")
     dispersion_check.check.grid(row = 1, sticky = "W")
     gamma1_lef.grid(row = 2)
@@ -550,8 +595,46 @@ if __name__ == "__main__":      # Stops bad run of main.py
     friction_label.grid(row = 11, sticky = "W")
     cd_fixed_lef.grid(row = 12)
     friction_matrix_check.check.grid(row = 13, sticky = "W")
-        
-    # Hot Start
+    
+    ### Numerics
+    ## widgets
+    numerics_label = ttk.Label(numerics_frame, 
+                               text = "Numerics Arguments")
+    time_scheme_combo = LabelCombo(numerics_frame,
+                                 text = "Time Scheme",
+                                 arr = ('Rugne_Kutta',
+                                   'Predictor_Corrector'))
+    high_order_combo = LabelCombo(numerics_frame,
+                                  text = "Higher Order Scheme",
+                                  arr = ('FOURTH',
+                                         'THIRD',
+                                         'SECOND'))
+    cfl_lef = LabelEntryF(numerics_frame, 
+                          text = "CFL")
+    froude_cap_lef = LabelEntryF(numerics_frame,
+                             text = "Froude Number Cap")
+    min_depth_lef = LabelEntryF(numerics_frame,
+                            text = "Wetting/Drying Min Depth")
+    time_scheme_combo.set("Rugne_Kutta")
+    high_order_combo.set("FOURTH")
+    cfl_lef.set(0.5)
+    froude_cap_lef.set(3.0)
+    min_depth_lef.set(0.1)
+
+    ## numerics pos
+    numerics_label.grid(row = 0, columnspan = 2, sticky = "NW")
+    time_scheme_combo.grid(row = 1)
+    high_order_combo.grid(row = 2)
+    cfl_lef.grid(row = 3)
+    froude_cap_lef.grid(row = 4)
+    min_depth_lef.grid(row = 5)
+
+
+    
+    
+
+
+    ### Hot Start
     def onCheckHotStart():
         if hotstart_check.get():   
             show_hotstart_entries()
@@ -571,7 +654,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         filenum_hot_led.hide()
         hotstart_int_lef.hide()
 
-    # Initial Condition
+    ### Initial Condition
     def onCheckInit():
         if init_check.get():
             show_init_entries()
@@ -607,7 +690,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     def hide_init_mask_entry():
         init_mask_les.hide()
     
-    # Wavemaker widgets
+    ### Wavemaker widgets
     isWavemaker = tk.BooleanVar(value = False)
     wavemaker = "WK_REG"
     wavemaker_var = tk.Variable(value = ('Internal Wave Maker (WK_REG)', 'TMA Spectrum Wave Maker (WK_IRR)',
@@ -657,14 +740,13 @@ if __name__ == "__main__":      # Stops bad run of main.py
     theta_peak_lef.set(0.0)
     nfreq_led.set(45)
     ntheta_led.set(24)
-
-    # use Default Checkbutton
+    ## use Default Checkbutton
     use_defaults_wk = tk.BooleanVar(value = True)
     def toggle_defaults_wk():
         toggle_wavemaker_entries(None)
     use_defaults_wk_check = tk.Checkbutton(wavemaker_frame, text = "Use Defaults",
                                            variable = use_defaults_wk, command = toggle_defaults_wk)
-    # wavemaker pos
+    ## wavemaker pos
     wavemaker_check.grid(row = 0, columnspan = 2, sticky = tk.N + tk.W)
     def show_wavemaker():
         wavemaker_break_lef.grid(row = 1)
@@ -701,7 +783,10 @@ if __name__ == "__main__":      # Stops bad run of main.py
     def toggle_wavemaker_entries(event):
         global wavemaker
         hide_wavemaker_entries()
-        curwavemaker = wavemaker_list.get(wavemaker_list.curselection()[0])
+        if len(wavemaker_list.curselection()) != 0:
+            curwavemaker = wavemaker_list.get(wavemaker_list.curselection()[0])
+        else:
+            return
         if 'WK_REG' in curwavemaker:
             wavemaker = 'WK_REG'
             xc_wk_lef.grid(row = 3)
@@ -775,13 +860,16 @@ if __name__ == "__main__":      # Stops bad run of main.py
     # warnings system
     # widget
     warnings_button = tk.Button(warnings_frame, text = "Validate")
-    warnings_text = tk.Text(warnings_frame, height = 10, width = 40, wrap = tk.WORD)
+    warnings_text = tk.Text(warnings_frame, 
+                            height = 10, width = 40, wrap = tk.WORD,
+                            exportselection = 0)
     warnings_text.config(state = tk.DISABLED)
     warnings_scrollbar = ttk.Scrollbar(warnings_frame, orient = tk.VERTICAL,
                                         command = warnings_text.yview)
     warnings_text['yscrollcommand'] = warnings_scrollbar
     # main warnings logic function
     def validate():
+        debug()
         counter = 0
         # support function
         def insert(message):
@@ -836,5 +924,10 @@ if __name__ == "__main__":      # Stops bad run of main.py
     overwrite_cb.grid(row = 0)
 
     overwrite_check_ttp = CreateToolTip(overwrite_cb.check, "Overwrites input.txt file when checked")
+    
+    def debug_print():
+        print(time_scheme_combo.get())
+
     m.mainloop()
+
 
