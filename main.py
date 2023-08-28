@@ -347,18 +347,40 @@ if __name__ == "__main__":      # Stops bad run of main.py
 
     ### Frames
     # TODO: sponge, shipwake, 
-    title_frame = tk.Frame(m)
-    parallel_frame = tk.Frame(m)
-    dimension_frame = tk.Frame(m)
-    time_frame = tk.Frame(m)
-    depth_frame = tk.Frame(m)
-    physics_frame = tk.Frame(m)
-    numerics_frame = tk.Frame(m)
-    hotstart_frame = tk.Frame(m)
-    init_frame = tk.Frame(m)
-    sponge_frame = tk.Frame(m)
-    wavemaker_frame = tk.Frame(m)
-    pbc_frame = tk.Frame(m)
+    ## param frames/scrollbar
+    canvas_m = tk.Canvas(m, height = 500, width = 1000)
+    canvas_m.grid(column = 0, 
+                  rowspan = 3, sticky = "N")
+    param_scrollbar = tk.Scrollbar(m, orient=tk.VERTICAL, command=canvas_m.yview)
+    param_scrollbar.grid(row = 0, column = 1, 
+                         rowspan = 3, sticky = "NSE")
+    # configure the canvas
+    canvas_m.configure(yscrollcommand=param_scrollbar.set)
+    canvas_m.bind(
+        '<Configure>', lambda e: canvas_m.configure(scrollregion=canvas_m.bbox("all"))
+    )
+
+    param_m = ttk.Frame(canvas_m) # main param frame
+    def resize_scrollbar():
+        canvas_m.configure(scrollregion=canvas_m.bbox("all"))
+    param_m.bind("<Configure>",         # dynamic scrolling
+                 lambda e: canvas_m.configure(scrollregion=canvas_m.bbox("all"))) 
+    
+    ## child widgets
+    title_frame = tk.Frame(param_m)
+    parallel_frame = tk.Frame(param_m)
+    dimension_frame = tk.Frame(param_m)
+    time_frame = tk.Frame(param_m)
+    depth_frame = tk.Frame(param_m)
+    physics_frame = tk.Frame(param_m)
+    numerics_frame = tk.Frame(param_m)
+    hotstart_frame = tk.Frame(param_m)
+    init_frame = tk.Frame(param_m)
+    sponge_frame = tk.Frame(param_m)
+    wavemaker_frame = tk.Frame(param_m)
+    pbc_frame = tk.Frame(param_m)
+    
+    #finalization frames
     warnings_frame = tk.Frame(m)
     igp_frame = tk.Frame(m)
     ## column 0
@@ -376,7 +398,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     physics_frame.grid(row = 0, column = 1, 
                   rowspan = 5, sticky = "NW", pady = 5)
     numerics_frame.grid(row = 5, column= 1,
-                        rowspan = 2, sticky = "NW", pady = 5)
+                        rowspan = 4, sticky = "NW", pady = 5)
     ## column 2
     pbc_frame.grid(row = 0, column = 2, sticky = "SW")
     wavemaker_frame.grid(row = 1, column = 2, rowspan = 8, sticky = "NW")
@@ -385,15 +407,19 @@ if __name__ == "__main__":      # Stops bad run of main.py
                         rowspan = 3, sticky = "NW")
     init_frame.grid(row = 3, column = 3,
                     rowspan = 2, sticky = "NW")
-    ## column max
-    warnings_frame.grid(row = 2, column = 8, 
-                        rowspan = 4)
-    igp_frame.grid(row = 9, column = 8, sticky = "SW")
+    ## final frame packing
+    warnings_frame.grid(row = 0, column = 2,            # scrollbar is on column 1
+                        rowspan = 4, sticky = "SE")
+    igp_frame.grid(row = 4, column = 2, sticky = "SE")
     ## row column weigthing system
+    param_m.columnconfigure(0, weight = 1)
+    param_m.columnconfigure(1, weight = 1)
+    param_m.columnconfigure(2, weight = 1)
     m.columnconfigure(0, weight = 1)
     m.columnconfigure(1, weight = 1)
     m.columnconfigure(2, weight = 1)
-    m.rowconfigure(8, weight = 1)
+    m.rowconfigure(0, weight = 1)
+    m.rowconfigure(1, weight = 1)
     
     ### Title Widgets
     title_les = LabelEntryS(title_frame, "Log Title")
@@ -446,6 +472,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             show_dt()
         else:
             hide_dt()
+        resize_scrollbar()
     fixed_dt_check = CheckB(time_frame, text = "Fixed dt",
                        value = False, command = onCheckFixedDt)
     dt_lef = LabelEntryF(time_frame, 'dt (s)')
@@ -494,6 +521,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         elif isDepthData.get():
             last_depth_check = 'DATA'
             show_data()
+        resize_scrollbar()    
     ## widget vars
     last_depth_check = 'FLAT'
     isFlat = tk.BooleanVar(value = True)
@@ -523,11 +551,11 @@ if __name__ == "__main__":      # Stops bad run of main.py
     depth_flat_lef.grid(row = 2, column = 1)
     ## support funcs
     def show_flat_lef():
-        depth_flat_lef.grid(row = 2, column = 1)
+        depth_flat_lef.grid(row = 2, column = 1)  
     def show_slope_lef():
         depth_flat_lef.grid(row = 2, column = 1)
         slope_lef.grid(row = 3, column = 1)
-        xslope_lef.grid(row = 4, column = 1)
+        xslope_lef.grid(row = 4, column = 1)   
     def show_data():
         depth_data_les.grid(row = 2, column = 1)
     def hide_depth_entries():
@@ -535,7 +563,6 @@ if __name__ == "__main__":      # Stops bad run of main.py
         slope_lef.hide()
         xslope_lef.hide()
         depth_data_les.hide()
-        pass
     
     ### Physics Widgets
     physics_label = tk.Label(physics_frame, text = "Physics Arguments")
@@ -550,6 +577,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             show_breaking_entries()
         else:
             hide_breaking_entries()
+        resize_scrollbar()
     viscosity_breaking_check = CheckB(physics_frame, text = "Viscosity Breaking",
                                       value = False, command = onCheckViscosityBreaking)
     cbrk1_lef = LabelEntryF(physics_frame, text = "c1")
@@ -563,6 +591,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             friction_matrix_les.grid(row = 14)
         else:
             friction_matrix_les.hide()
+        resize_scrollbar()       
 
     friction_matrix_check = CheckB(physics_frame, text = "Friction Matrix",
                                    command = onCheckFrictionMatrix)
@@ -640,6 +669,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             show_hotstart_entries()
         else:
             hide_hotstart_entries()
+        resize_scrollbar()  
     hotstart_check = CheckB(hotstart_frame, "Hot Start",
                         value = False, command = onCheckHotStart)
     filenum_hot_led = LabelEntryD(hotstart_frame, 
@@ -660,11 +690,13 @@ if __name__ == "__main__":      # Stops bad run of main.py
             show_init_entries()
         else:
             hide_init_entries()
+        resize_scrollbar()  
     def onCheckInitMask():
         if init_mask_check.get():
             show_init_mask_entry()
         else:
             hide_init_mask_entry()
+        resize_scrollbar()  
     init_check = CheckB(init_frame, "Initial Condition",
                         value = False, command = onCheckInit)
     init_eta_les = LabelEntryS(init_frame, "Initial Eta File")
@@ -686,7 +718,6 @@ if __name__ == "__main__":      # Stops bad run of main.py
         init_mask_les.hide()
     def show_init_mask_entry():
         init_mask_les.grid(row = 4)
-        print("show")
     def hide_init_mask_entry():
         init_mask_les.hide()
     
@@ -705,6 +736,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             show_wavemaker()
         else:
             hide_wavemaker()
+        resize_scrollbar()  
     wavemaker_check = tk.Checkbutton(wavemaker_frame, text = "Wave Maker",
                                      variable = isWavemaker, command = onCheckWaveMaker)
     wavemaker_list = tk.Listbox(wavemaker_frame, listvariable = wavemaker_var,
@@ -744,6 +776,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     use_defaults_wk = tk.BooleanVar(value = True)
     def toggle_defaults_wk():
         toggle_wavemaker_entries(None)
+        resize_scrollbar()
     use_defaults_wk_check = tk.Checkbutton(wavemaker_frame, text = "Use Defaults",
                                            variable = use_defaults_wk, command = toggle_defaults_wk)
     ## wavemaker pos
@@ -849,7 +882,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
             pass
         elif 'INI_GAU' in curwavemaker:
             wavemaker = "INI_GAU"
-            pass
+        resize_scrollbar()
     wavemaker_list.bind('<<ListboxSelect>>', toggle_wavemaker_entries)
 
     # periodic boundary condition widgets
@@ -928,6 +961,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     def debug_print():
         print(time_scheme_combo.get())
 
+    canvas_m.create_window((0, 0), window=param_m, anchor="nw")
     m.mainloop()
 
 
