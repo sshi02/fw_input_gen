@@ -2,12 +2,12 @@
 ! NOTE: all input parameter are capital sensitive
 ! --------------------TITLE-------------------------------------
 ! title only for log file
-TITLE =model1
+TITLE = model1
 
 ! -------------------PARALLEL INFO-----------------------------
 !    PX,PY - processor numbers in X and Y
 !    NOTE: make sure consistency with mpirun -np n (px*py)
-PX = 4
+PX = 6
 PY = 1
 ! --------------------DEPTH-------------------------------------
 ! Depth types, DEPTH_TYPE=DATA: from depth file
@@ -34,8 +34,48 @@ SCREEN_INTV = 1.000000
 ! ----------------PHYSICS------------------------------
 ! parameters to control type of equations
 ! dispersion: all dispersive terms
-! gamma1=1.0,gamma2=1.0: defalt: Fully nonlinear equationsDISPERSION = TGamma1 = 1.000000
+! gamma1=1.0,gamma2=1.0: defalt: Fully nonlinear equations
+DISPERSION = TGamma1 = 1.000000
 Gamma2 = 1.000000
 Gamma3 = 1.000000
 Beta_ref = -0.531000
-VISCOSITY BREAKING
+VISCOSITY_BREAKING = F
+SWE_ETA_DEP = 0.8
+ROLLER_EFFECT = F
+!----------------Friction-----------------------------
+Cd_fixed = 0.000000
+FRICTION_MATRIX = F
+SHOW_BREAKING = F
+WAVEMAKER_cbrk = 0.450000
+! ----------------NUMERICS----------------------------
+! time scheme: runge_kutta for all types of equations
+!              predictor-corrector for NSWE
+! space scheme: second-order
+!               fourth-order
+! construction: HLLC
+! cfl condition: CFL
+! froude number cap: FroudeCap
+Time_Scheme = Rugne_Kutta
+HIGH_ORDER = FOURTH
+CFL = 0.5
+FroudeCap = 3.0
+MinDepth = 0.100000
+! ----------------WAVEMAKER------------------------------
+!  wave maker
+! LEF_SOL- left boundary solitary, need AMP,DEP, LAGTIME
+! INI_SOL- initial solitary wave, WKN B solution,
+! need AMP, DEP, XWAVEMAKER
+! INI_REC - rectangular hump, need to specify Xc,Yc and WID
+! WK_REG - Wei and Kirby 1999 internal wave maker, Xc_WK,Tperiod
+!          AMP_WK,DEP_WK,Theta_WK, Time_ramp (factor of period)
+! WK_IRR - Wei and Kirby 1999 TMA spectrum wavemaker, Xc_WK,
+!          DEP_WK,Time_ramp, Delta_WK, FreqPeak, FreqMin,FreqMax,
+!          Hmo,GammaTMA,ThetaPeak
+! WK_TIME_SERIES - fft time series to get each wave component
+!                 and then use Wei and Kirby 1999
+!          need input WaveCompFile (including 3 columns: per,amp,pha)
+!          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK
+! ---------------- PERIODIC BOUNDARY CONDITION ---------
+! South-North periodic boundary condition
+!
+PERIODIC = F

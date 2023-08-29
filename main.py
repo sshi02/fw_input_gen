@@ -2,12 +2,13 @@ import tkinter as tk        # GUI Library, native Python library
 from tkinter import ttk     # extra widgets from library
 import os                   # help with PATH
 
-#### main.py structure:
+### main.py project structure:
 # Helper Classes, such as Classes that manage widgets
 # Helper Functions
 # Main GUI Body
 #   - This contains a generate() function for generating input.txt
 
+###############################
 #### Helper Classes
 class LabelEntryD: # shorthand LED in variable names
     '''LabelEntryD(ecimal) Class. 
@@ -146,6 +147,25 @@ class LabelEntryS:
         self.entry.grid(row = row, column = column + 1)
 
 class CheckB:
+    '''CheckB(oolean) Class. 
+    This class manages a checkbox widget
+
+    Args:
+        m: Frame/Window the widgets will belong to
+        text: Checkbox text
+    Methods:
+        set(): sets value of boolean in Checkbox
+        get(): returns last value inputted to Checkbox
+    
+    Example use case:
+    |   import tkinter as tk
+    |
+    |   m = tk.Tk()                               # init tkinter window
+    |   happy_check = CheckB(m, value = True)     # init checkb, with init value True
+    |   print(happy_check.get())                  # Get current value of CheckB
+    |   happy_check.grid(row = 0, column = 0)
+    |   m.mainloop()
+    '''
     def __init__(self, m, text, value = False, command = None) -> None:
         self.bool = tk.BooleanVar(value = value)
         if command != None:
@@ -158,9 +178,7 @@ class CheckB:
             self.check = tk.Checkbutton(m, text = text,
                                     variable = self.bool,
                                     onvalue = True,
-                                    offvalue = False)            
-
-            
+                                    offvalue = False)                
     def set(self, x):
         self.bool.set()
     def get(self):
@@ -172,12 +190,31 @@ class CheckB:
         self.check.grid(row = row, column = column)
 
 class LabelCombo:
+    '''LabelCombo(box) Class. 
+    This class manages a label and combobox widget. Input is not validated
+
+    Args:
+        m: Frame/Window the widgets will belong to
+        text: Label text
+    Methods:
+        set(): sets value of Combobox
+        get(): returns last value selected in Combobox
+    
+    Example use case:
+    |   import tkinter as tk
+    |
+    |   m = tk.Tk()                                     # init tkinter window
+    |   name_list = ('David', 'Mike')                   # list of names
+    |   name_combo = LabelCombo(m, "Names", name_list)  # init checkb, with init value True
+    |   print(name_combo.get())                         # Get current value of CheckB
+    |   name_combo.grid(row = 0, column = 0)
+    |   m.mainloop()
+    '''
     def __init__(self, m, text, arr) -> None:
         self.label = tk.Label(m, text = text)
         self.str = tk.StringVar()
         self.combo = ttk.Combobox(m, textvariable = self.str)
         self.combo['values'] = arr
-    
     def set(self, x):
         self.str.set(x)
         self.combo.set(x)
@@ -253,8 +290,8 @@ class CreateToolTip(object): # shortened to ttp in var names
         if tw:
             tw.destroy()
 
+###############################
 ### Helper Functions
-
 def center(e):
     '''
     This function is used to center the title of the window
@@ -263,7 +300,6 @@ def center(e):
     s = 'Generate input.txt'.rjust(w//2)
     m.title(s)
 
-# unique filename func
 def uniquify(path):
     '''
     This function is used to produce a unique filename given a PATH
@@ -280,15 +316,15 @@ def uniquify(path):
 #####################################
 ### main body
 if __name__ == "__main__":      # Stops bad run of main.py
-    def debug():
-        debug_print()
+    def debug():                # debug output
+        debug_print()           # see function at bottom
     m = tk.Tk()
     cwd = os.path.dirname(os.path.realpath(__file__))
     output_folder = "output/"
     init_station = tk.BooleanVar(value = False)
 
     ### Local Functions
-    # TODO: pbc, wavemaker, physics, numerics, ini cond
+    # TODO: 
     def generate():
         print("Generating input.txt")
         if overwrite_cb.get():
@@ -298,7 +334,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f = open(filename, "w+")
         f.write("! INPUT FILE FOR FUNWAVE_TVD\n! NOTE: all input parameter are capital sensitive\n")
         f.write("! --------------------TITLE-------------------------------------\n! title only for log file\n")
-        f.write(f"TITLE ={title_les.get()}\n\n")
+        f.write(f"TITLE = {title_les.get()}\n\n")
         f.write("! -------------------PARALLEL INFO-----------------------------\n!    PX,PY - processor numbers in X and Y\n!    NOTE: make sure consistency with mpirun -np n (px*py)\n")
         f.write(f"PX ={px_led.get() : .0f}\nPY ={py_led.get() : .0f}\n")
         f.write("! --------------------DEPTH-------------------------------------\n! Depth types, DEPTH_TYPE=DATA: from depth file\n!              DEPTH_TYPE=FLAT: idealized flat, need depth_flat\n!              DEPTH_TYPE=SLOPE: idealized slope,\n!                                 need slope,SLP starting point, Xslp\n!                                 and depth_flat\n")
@@ -310,7 +346,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
         else:
             f.write(f"DEPTH_FILE = {depth_data.get()}\n")
         f.write("! -------------------PRINT---------------------------------\n! PRINT*,\n! result folder\n")
-        f.write(f"RESULT_FOLDER = {output_folder}\n")
+        f.write("RESULT_FOLDER = " + ("./" if result_folder_les.get() == "" else result_folder_les.get()) + "\n")
         f.write("! ------------------DIMENSION-----------------------------\n! global grid dimension\n")
         f.write(f"Mglob = {mglob_led.get()}\nNglob = {nglob_led.get()}\n")
         f.write("! ----------------- TIME----------------------------------\n! time: total computational time/ plot time / screen interval\n! all in seconds\n")
@@ -318,14 +354,21 @@ if __name__ == "__main__":      # Stops bad run of main.py
         f.write(f"PLOT_INTV ={plot_int_lef.get() : f}\n")
         f.write(f"SCREEN_INTV ={screen_int_lef.get() : f}\n")
         if (hotstart_check.get()):
-            f.write(f"! -------------------HOT START---------------------------------\nHOT_START = F")
+            f.write(f"! -------------------HOT START---------------------------------\nHOT_START = T\n")
             f.write(f"FileNumber_HOTSTART = {filenum_hot_led.get()}\n")
             f.write(f"HOTSTART_INTV = {hotstart_int_lef.get() :f}\n")
+        if (init_check.get()):
+            f.write(f"! ---------------INITIAL CONDITION----------------------------\nINI_UVZ = F\n")
+            f.write(f"ETA_FILE = {init_eta_les.get()}")
+            if init_u_les.get() != "":
+                f.write(f"U_FILE = {init_u_les.get()}")
+            if init_v_les.get() != "":
+                f.write(f"V_FILE = {init_v_les.get()}")
+            if init_mask_check.get():
+                f.write(f"MASK_FILE = {init_mask_les.get()}")
         f.write("! ----------------PHYSICS------------------------------\n! parameters to control type of equations\n! dispersion: all dispersive terms\n! gamma1=1.0,gamma2=1.0: defalt: Fully nonlinear equations\n")
-        if dispersion_check.get():
-            f.write(f"DISPERSION = T")
-        else:
-            f.write(f"DISPERSION = F")
+
+        f.write(f"DISPERSION = " + ("T" if dispersion_check.get() else "F"))
         f.write(f"Gamma1 = {gamma1_lef.get() :f}\n")
         f.write(f"Gamma2 = {gamma2_lef.get() :f}\n")
         f.write(f"Gamma3 = {gamma3_lef.get() :f}\n")
@@ -337,8 +380,61 @@ if __name__ == "__main__":      # Stops bad run of main.py
         else:
             f.write(f"VISCOSITY_BREAKING = F\n")
         f.write(f"SWE_ETA_DEP = {swe_eta_lef.get()}\n")
-        
-        
+        f.write(f"ROLLER_EFFECT = " + ("T" if roller_effect_check.get() else "F") + "\n")
+        f.write("!----------------Friction-----------------------------\n")
+        f.write(f"Cd_fixed = {cd_fixed_lef.get():f}\n")
+        f.write(f"FRICTION_MATRIX = " + ("T" if friction_matrix_check.get() else "F") + "\n")
+        if friction_matrix_check.get():
+            f.write(f"FRICTION_FILE = {friction_matrix_les}\n")
+        f.write(f"SHOW_BREAKING = " + ("T" if show_breaking_check.get() else "F") + "\n")
+        f.write(f"WAVEMAKER_cbrk = {wavemaker_break_lef.get():f}\n")
+        f.write("! ----------------NUMERICS----------------------------\n! time scheme: runge_kutta for all types of equations\n!              predictor-corrector for NSWE\n! space scheme: second-order\n!               fourth-order\n! construction: HLLC\n! cfl condition: CFL\n! froude number cap: FroudeCap\n")
+        f.write(f"Time_Scheme = {time_scheme_combo.get()}\n")
+        f.write(f"HIGH_ORDER = {high_order_combo.get()}\n")
+        f.write(f"CFL = {cfl_lef.get()}\n")
+        f.write(f"FroudeCap = {froude_cap_lef.get()}\n")
+        f.write(f"MinDepth = {min_depth_lef.get():f}\n")
+        f.write(f"! ----------------WAVEMAKER------------------------------\n!  wave maker\n! LEF_SOL- left boundary solitary, need AMP,DEP, LAGTIME\n! INI_SOL- initial solitary wave, WKN B solution,\n! need AMP, DEP, XWAVEMAKER\n! INI_REC - rectangular hump, need to specify Xc,Yc and WID\n! WK_REG - Wei and Kirby 1999 internal wave maker, Xc_WK,Tperiod\n!          AMP_WK,DEP_WK,Theta_WK, Time_ramp (factor of period)\n! WK_IRR - Wei and Kirby 1999 TMA spectrum wavemaker, Xc_WK,\n!          DEP_WK,Time_ramp, Delta_WK, FreqPeak, FreqMin,FreqMax,\n!          Hmo,GammaTMA,ThetaPeak\n! WK_TIME_SERIES - fft time series to get each wave component\n!                 and then use Wei and Kirby 1999\n!          need input WaveCompFile (including 3 columns: per,amp,pha)\n!          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK\n")
+        if isWavemaker:
+            f.write(f"WAVEMAKER = {wavemaker}\n")
+            match wavemaker:
+                case 'WK_REG':
+                    f.write(f"DEP_WK = {dep_wk_lef.get():f}\n")
+                    f.write(f"Xc_WK = {xc_wk_lef.get():f}\n")
+                    f.write(f"Yc_WK = {yc_wk_lef.get():f}\n")
+                    f.write(f"Tperiod = {tperiod_lef.get():f}\n")
+                    f.write(f"AMP_WK = {amp_wk_lef.get():f}\n")
+                    f.write(f"Theta_WK = {theta_wk_lef.get():f}\n")
+                    f.write(f"Delta_WK = {theta_wk_lef.get():f}\n")
+                case 'WK_IRR':
+                    pass
+                case 'WK_NEW_IRR':
+                    pass
+                case 'JON_2D':
+                    pass
+                case 'JON_1D':
+                    pass
+                case 'TMA_1D':
+                    pass
+                case 'WK_NEW_DATA_2D':
+                    pass
+                case 'WK_DATA2D':
+                    pass
+                case 'WK_NEW_DATA_2D':
+                    pass
+                case 'LEFT_BC_IRR':
+                    pass
+                case 'LEF_SOL':
+                    pass
+                case 'INI_SOL':
+                    pass
+                case 'INI_REC':
+                    pass
+                case 'INI_GAU':
+                    pass
+        f.write(f"! ---------------- PERIODIC BOUNDARY CONDITION ---------\n! South-North periodic boundary condition\n!\n")
+        f.write("PERIODIC = " + ("T" if pbc_check.get() else "F") + "\n")
+
         f.close()
 
     ### Window Params
@@ -348,7 +444,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     ### Frames
     # TODO: sponge, shipwake, 
     ## param frames/scrollbar
-    canvas_m = tk.Canvas(m, height = 500, width = 1000)
+    canvas_m = tk.Canvas(m, height = 500, width = 1000, highlightthickness=0)
     canvas_m.grid(column = 0, 
                   rowspan = 3, sticky = "N")
     param_scrollbar = tk.Scrollbar(m, orient=tk.VERTICAL, command=canvas_m.yview)
@@ -381,6 +477,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     pbc_frame = tk.Frame(param_m)
     
     #finalization frames
+    output_frame = tk.Frame(m)
     warnings_frame = tk.Frame(m)
     igp_frame = tk.Frame(m)
     ## column 0
@@ -404,13 +501,14 @@ if __name__ == "__main__":      # Stops bad run of main.py
     wavemaker_frame.grid(row = 1, column = 2, rowspan = 8, sticky = "NW")
     ## column 3
     hotstart_frame.grid(row = 0, column = 3, 
-                        rowspan = 3, sticky = "NW")
+                        rowspan = 3, sticky = "NW", pady = 5)
     init_frame.grid(row = 3, column = 3,
-                    rowspan = 2, sticky = "NW")
+                    rowspan = 2, sticky = "NW", pady = 5)
     ## final frame packing
-    warnings_frame.grid(row = 0, column = 2,            # scrollbar is on column 1
-                        rowspan = 4, sticky = "SE")
-    igp_frame.grid(row = 4, column = 2, sticky = "SE")
+    output_frame.grid(row = 0, column = 2, sticky  = "NW", pady = 5)
+    warnings_frame.grid(row = 1, column = 2,            # scrollbar is on column 1
+                        rowspan = 4, sticky = "SE", pady = 5)
+    igp_frame.grid(row = 5, column = 2, sticky = "SE", pady = 5)
     ## row column weigthing system
     param_m.columnconfigure(0, weight = 1)
     param_m.columnconfigure(1, weight = 1)
@@ -624,6 +722,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     friction_label.grid(row = 11, sticky = "W")
     cd_fixed_lef.grid(row = 12)
     friction_matrix_check.check.grid(row = 13, sticky = "W")
+    show_breaking_check.check.grid(row = 15, sticky = "W")
     
     ### Numerics
     ## widgets
@@ -657,11 +756,6 @@ if __name__ == "__main__":      # Stops bad run of main.py
     cfl_lef.grid(row = 3)
     froude_cap_lef.grid(row = 4)
     min_depth_lef.grid(row = 5)
-
-
-    
-    
-
 
     ### Hot Start
     def onCheckHotStart():
@@ -885,10 +979,51 @@ if __name__ == "__main__":      # Stops bad run of main.py
         resize_scrollbar()
     wavemaker_list.bind('<<ListboxSelect>>', toggle_wavemaker_entries)
 
-    # periodic boundary condition widgets
-    pbc_cb = CheckB(pbc_frame, "Periodic Boundary Condition")
-    pbc_cb.grid(row = 0)
+    ### periodic boundary condition widgets
+    pbc_check = CheckB(pbc_frame, "Periodic Boundary Condition")
+    pbc_check.grid(row = 0)
     
+    ### output frame
+    output_label = tk.Label(output_frame, text = "Output Arguments")
+    result_folder_les = LabelEntryS(output_frame, "Output Folder")
+    result_folder_les.set("output/")
+    number_stations_led = LabelEntryD(output_frame, "Number of Stations")
+    def onWriteNumberStations(var, index, mode):
+        if (number_stations_led.str.get().strip().isdigit()):
+                number_stations_led.value = int(number_stations_led.str.get())
+        elif not number_stations_led.str.get().strip() == '':
+                number_stations_led.str.set(f"{number_stations_led.value : .0f}")
+        if (number_stations_led.get() > 0):
+            show_number_station_file()
+        else:
+            hide_number_station_file()
+    number_stations_led.str.trace_add("write", onWriteNumberStations)
+    station_file_lef = LabelEntryS(output_frame, text = "Station File")
+    output_var = tk.Variable(value = ('U', 'V', 'ETA (Surface Elevation)', 'MASK', 'MASK9', 'SourceX', 'SourceY',
+                                      'P', 'Q', 'Fx', 'Fy', 'Gx', 'Gy', 'AGE (Breaking Age)', 'HMAX (Max Surface Elevation)',
+                                      'HMIN (Min Surface Elevation)', 'UMAX (Max U)', 'VORMAX (Max V)',
+                                      'MFMAX (Max F)', 'OUT_Time (Tsunami Arrival Time)', 'WaveHeight', 'OUT_METEO (Pressure Field)',
+                                      'ROLLER', 'UNDERTOW', "OUT_NU (Breaking Location)"))
+    output_list = tk.Listbox(output_frame, listvariable = output_var, 
+                                selectmode = tk.MULTIPLE, height = 10, width = 42)
+    output_scrollbar = ttk.Scrollbar(output_frame, orient = tk.VERTICAL,
+                                     command = output_list.yview)
+    output_list['yscrollcommand'] = output_scrollbar
+    
+    output_label.grid(row = 0, columnspan = 2,
+                      sticky = "W")
+    result_folder_les.label.grid(row = 1, column = 0)
+    result_folder_les.entry.grid(row = 1, column = 1)
+    number_stations_led.grid(row = 2)
+    output_list.grid(row = 6, columnspan = 3)
+    output_scrollbar.grid(row = 6, column = 3, sticky = "NSW")
+    def show_number_station_file():
+        station_file_lef.label.grid(row = 3, column = 0)
+        station_file_lef.entry.grid(row = 3, column = 1)
+    def hide_number_station_file():
+        station_file_lef.hide()
+
+
 
     # warnings system
     # widget
