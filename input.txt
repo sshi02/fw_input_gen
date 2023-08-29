@@ -7,7 +7,7 @@ TITLE = model1
 ! -------------------PARALLEL INFO-----------------------------
 !    PX,PY - processor numbers in X and Y
 !    NOTE: make sure consistency with mpirun -np n (px*py)
-PX = 6
+PX = 4
 PY = 1
 ! --------------------DEPTH-------------------------------------
 ! Depth types, DEPTH_TYPE=DATA: from depth file
@@ -75,7 +75,22 @@ MinDepth = 0.100000
 !                 and then use Wei and Kirby 1999
 !          need input WaveCompFile (including 3 columns: per,amp,pha)
 !          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK
+WAVEMAKER = WK_REG
+DEP_WK = 0.000000
+Xc_WK = 0.000000
+Yc_WK = 0.000000
+Tperiod = 0.000000
+AMP_WK = 0.000000
+Theta_WK = 0.000000
+Delta_WK = 0.000000
 ! ---------------- PERIODIC BOUNDARY CONDITION ---------
 ! South-North periodic boundary condition
 !
 PERIODIC = F
+! -----------------OUTPUT-----------------------------
+! stations
+! if NumberStations>0, need input i,j in STATION_FILE
+ETA= T
+SourceY= T
+P= T
+Q= T

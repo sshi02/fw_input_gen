@@ -434,7 +434,12 @@ if __name__ == "__main__":      # Stops bad run of main.py
                     pass
         f.write(f"! ---------------- PERIODIC BOUNDARY CONDITION ---------\n! South-North periodic boundary condition\n!\n")
         f.write("PERIODIC = " + ("T" if pbc_check.get() else "F") + "\n")
-
+        f.write("! -----------------OUTPUT-----------------------------\n! stations\n! if NumberStations>0, need input i,j in STATION_FILE\n")
+        f.write(f"NumStations = {number_stations_led.get()}\n")
+        if number_stations_led.get() > 0:
+            f.write(f"STATION_FILE = {station_file_lef}\n")
+        for item in output_list.curselection():
+            f.write(output_list.get(item).split(" ")[0] + " = T\n")
         f.close()
 
     ### Window Params
@@ -470,11 +475,15 @@ if __name__ == "__main__":      # Stops bad run of main.py
     depth_frame = tk.Frame(param_m)
     physics_frame = tk.Frame(param_m)
     numerics_frame = tk.Frame(param_m)
+    pbc_frame = tk.Frame(param_m)
+    wavemaker_frame = tk.Frame(param_m)
     hotstart_frame = tk.Frame(param_m)
     init_frame = tk.Frame(param_m)
     sponge_frame = tk.Frame(param_m)
-    wavemaker_frame = tk.Frame(param_m)
-    pbc_frame = tk.Frame(param_m)
+    vessel_frame = tk.Frame(param_m)
+    tide_frame = tk.Frame(param_m)
+    
+
     
     #finalization frames
     output_frame = tk.Frame(m)
@@ -508,7 +517,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     output_frame.grid(row = 0, column = 2, sticky  = "NW", pady = 5)
     warnings_frame.grid(row = 1, column = 2,            # scrollbar is on column 1
                         rowspan = 4, sticky = "SE", pady = 5)
-    igp_frame.grid(row = 5, column = 2, sticky = "SE", pady = 5)
+    igp_frame.grid(row = 5, column = 2, sticky = "S", pady = 5)
     ## row column weigthing system
     param_m.columnconfigure(0, weight = 1)
     param_m.columnconfigure(1, weight = 1)
@@ -999,7 +1008,9 @@ if __name__ == "__main__":      # Stops bad run of main.py
             hide_number_station_file()
     number_stations_led.str.trace_add("write", onWriteNumberStations)
     station_file_lef = LabelEntryS(output_frame, text = "Station File")
-    output_var = tk.Variable(value = ('U', 'V', 'ETA (Surface Elevation)', 'MASK', 'MASK9', 'SourceX', 'SourceY',
+    output_res_led = LabelEntryD(output_frame, text = "Output Resolution")
+    output_res_led.set(1)
+    output_var = tk.Variable(value = ('U', 'V', 'ETA (Surface Elevation)', 'MASK', 'MASK9', 'DEPTH_OUT', 'SourceX', 'SourceY',
                                       'P', 'Q', 'Fx', 'Fy', 'Gx', 'Gy', 'AGE (Breaking Age)', 'HMAX (Max Surface Elevation)',
                                       'HMIN (Min Surface Elevation)', 'UMAX (Max U)', 'VORMAX (Max V)',
                                       'MFMAX (Max F)', 'OUT_Time (Tsunami Arrival Time)', 'WaveHeight', 'OUT_METEO (Pressure Field)',
@@ -1015,6 +1026,7 @@ if __name__ == "__main__":      # Stops bad run of main.py
     result_folder_les.label.grid(row = 1, column = 0)
     result_folder_les.entry.grid(row = 1, column = 1)
     number_stations_led.grid(row = 2)
+    output_res_led.grid(row = 3)
     output_list.grid(row = 6, columnspan = 3)
     output_scrollbar.grid(row = 6, column = 3, sticky = "NSW")
     def show_number_station_file():
@@ -1022,8 +1034,6 @@ if __name__ == "__main__":      # Stops bad run of main.py
         station_file_lef.entry.grid(row = 3, column = 1)
     def hide_number_station_file():
         station_file_lef.hide()
-
-
 
     # warnings system
     # widget
